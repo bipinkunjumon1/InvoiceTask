@@ -132,7 +132,7 @@ st.markdown("""
     .sidebar-card { background-color: #f9fafb; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
     .btn-primary { background-color: #2563eb; color: white; padding: 10px 20px; border-radius: 6px; }
     .btn-primary:hover { background-color: #1d4ed8; }
-    .table-header { background-color: #e5e7eb; font-weight: 600; }
+    .table-header { background-color: #ffffff; color: #000000; font-weight: 600; }
     .status-approved { color: #15803d; font-weight: bold; }
     .status-review { color: #b91c1c; font-weight: bold; }
 </style>
@@ -222,29 +222,29 @@ if 'analysis' in locals():
     st.markdown('<h2 class="text-xl font-semibold">🔎 Match/Mismatch Summary</h2>', unsafe_allow_html=True)
 
     def generate_match_summary(invoice_data, po_data):
-        summary = ""
+        lines = []
         issues = []
 
         invoice_no = invoice_data.get("invoice_no", "N/A")
         po_no = po_data.get("po_no", "N/A")
-        summary += f"• Invoice #{invoice_no} matches PO #{po_no}\n"
+        lines.append(f"• Invoice #{invoice_no} matches PO #{po_no}")
 
         # Vendor check
         if invoice_data.get("vendor") == po_data.get("vendor"):
-            summary += f"• Vendor matches: {invoice_data.get('vendor')} ✓\n"
+            lines.append(f"• Vendor matches: {invoice_data.get('vendor')} ✓")
         else:
-            summary += f"• Vendor mismatch: Invoice ({invoice_data.get('vendor')}) vs PO ({po_data.get('vendor')}) ✗\n"
+            lines.append(f"• Vendor mismatch: Invoice ({invoice_data.get('vendor')}) vs PO ({po_data.get('vendor')}) ✗")
             issues.append("Vendor mismatch")
 
         # Total check
         invoice_total = float(invoice_data.get("total", 0.0))
         po_total = float(po_data.get("total", 0.0))
         if abs(invoice_total - po_total) < 0.01:
-            summary += f"• Total amount matches: ${invoice_total:.2f} ✓\n"
+            lines.append(f"• Total amount matches: ${invoice_total:.2f} ✓")
         else:
             diff = abs(invoice_total - po_total)
-            summary += f"• Total amount mismatch: Invoice (${invoice_total:.2f}) vs PO (${po_total:.2f}) ✗\n"
-            summary += f"→ Difference: ${diff:.2f}\n"
+            lines.append(f"• Total amount mismatch: Invoice (${invoice_total:.2f}) vs PO (${po_total:.2f}) ✗")
+            lines.append(f"→ Difference: ${diff:.2f}")
             issues.append("Total mismatch")
 
         # Items check
@@ -265,17 +265,18 @@ if 'analysis' in locals():
                     break
 
         if all_items_match:
-            summary += "• All items match ✓\n"
+            lines.append("• All items match ✓")
         else:
-            summary += "• Items mismatch ✗\n"
+            lines.append("• Items mismatch ✗")
             issues.append("Items mismatch")
 
         # Status
         if not issues:
-            summary += '<span class="status-approved">→ Status: APPROVED - No issues found! ✅</span>'
+            lines.append('<span class="status-approved">→ Status: APPROVED - No issues found! ✅</span>')
         else:
-            summary += '<span class="status-review">→ Status: NEEDS REVIEW ⚠️ - Please check the highlighted discrepancies!</span>'
+            lines.append('<span class="status-review">→ Status: NEEDS REVIEW ⚠️ - Please check the highlighted discrepancies!</span>')
         
+        summary = "<br>".join(lines)
         return summary
 
     match_summary = generate_match_summary(invoice_data, po_data)
