@@ -1,0 +1,8 @@
+#requirements.txt
+PyMuPDF
+pdfplumber
+Pillow
+google-generativeai
+python-dotenv
+streamlit
+pytesseract
